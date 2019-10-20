@@ -1,0 +1,77 @@
+# part of my .bashrc
+
+########################################
+# keybinding stuff
+##########
+#	tab completion and history recall
+#		set autolist (lists all autocomplete possibilities)
+#			http://linux.about.com/library/cmd/blcmdl1_csh.htm
+#			^D (Ctrl-D) does this on a single command basis.
+#			set autolist `ambiguous'
+#			See: ignoreeof, fignore, complete-word-fwd, complete-word-back
+#			$TERM, $TERMCAP
+#			+See: expand-history history-search-backward, up-history/down-history
+#			+bindkey (tcsh - set keybindings and view all current keybindings), bind (bash - set keybindings), bind -p and bind -P (bash - view all current keybindings)
+#			http://answers.google.com/answers/threadview?id=27006
+#			See: /dokey
+#	Hint for finding the key combos:
+#		Run "cat" and type, everything you type will be echoed to the screen until you type Ctrl-C to quit
+#		If you see text like "^[[A", the '^[' is the escape char (1 char, not 2 printable chars), you can make that char by either hitting Ctrl-V Esc in the terminal, or just by using "\e" in whatever file you're putting it into.  "\e" is 2 printable chars, but interpreted as a single escaped char ("\e" = escape char just like "\t" usually = tab char and "\n" = newline char and is often the same as "\x1B" or "\033")
+#	View all current key bindings
+#		bind -P  # human readable
+#		bind -p  # script readable
+#		Ex: bind -P | grep "end-of-line"
+#	Tell bash to use vim keybinding scheme:
+#		set -o vi
+########################################
+
+	# Keybindings - remap the up and down arrows for more efficient scrolling through history.
+	#	Old (default) behavior: up & down cycle through commands in history
+	#	New behavior: up & down cycle through commands in history, but ONLY the commands that start with the same letters that are in front of the cursor.
+	#		Example: to quickly recall your last grep command(s), type "grep" and then up or down.
+bind '"\e[A"':history-search-backward  # Up key (default ?= previous-history) "\M-[A"
+bind '"\e[B"':history-search-forward  # Down key (default ?= next-history)
+#	For certain systems I haven't fully identified yet
+#		The CSEL was sort of like this
+#		The terminal on my Mac might use this AFTER I PRINT A CERTAIN FILE TO THE TERMINAL (the 1st 10 lines of the output of vimdiff)
+#			Doesn't matter what machine I'm logged into, just that I'm using the Mac's terminal
+bind '"\eOA"':history-search-backward  # Up key (default ?= previous-history)
+bind '"\eOB"':history-search-forward  # Down key (default ?= next-history)
+
+# Fix Home and End keys on shyamc-linux (already done on thunderstorm)
+	# Note: On most machines "Ctrl-A" acts as "Home" and "Ctrl-E" acts as "End"
+bind '"\e[1~"':beginning-of-line  # Home key
+bind '"\e[4~"':end-of-line  # End key (default ?= end-of-line)
+
+# Fix Mac - these don't seem to be the defaults on Mac like they do on other systems
+bind '"\e[5C"':forward-word  # Crtl-Right key
+bind '"\e[5D"':backward-word  # Crtl-Left key
+#	For Mac when logged in from Ubuntu / Gnome terminal
+bind '"\e[1;5C"':forward-word  # Crtl-Right key
+bind '"\e[1;5D"':backward-word  # Crtl-Left key
+#	For Ubuntu when logged in from Windows 8 / PuTTY
+bind '"\eOC"':forward-word  # Crtl-Right key
+bind '"\eOD"':backward-word  # Crtl-Left key
+
+
+	##########
+	# Mess up right and left arrows and other keys for fun and as an example:
+	##########
+
+	##bind '"\e[C"':backward-char  # Right key (default ?= forward-char)
+	##bind '"\e[D"':forward-char  # Left key (default ?= backward-char) (Works)
+	#bind '"\M-[D"':forward-char  # Left key (default ?= backward-char) (Doesn't work)
+	#bind '"\M-0D"':forward-char  # Left key (default ?= backward-char) (Doesn't work)
+	##bind '"\e[5C"':backward-word  # Crtl-Right key (default ?= forward-word) (Works)
+	##bind '"\e[5D"':forward-word  # Crtl-Left key (default ?= backward-word) (Works)
+	#bind '"\eOH"':end-of-line  # Home key (default ?= beginning-of-line) (Works on some machines - Note: the 'O' is a capital letter, not a zero)
+	#bind '"\e[1~"':end-of-line  # Home key (Works on some machines)
+	#bind '"\eOF"':beginning-of-line  # End key (default ?= end-of-line) (Works on some machines - Note: the 'O' is a capital letter, not a zero)
+	#bind '"\e[4~"':beginning-of-line  # End key (default ?= end-of-line) (Works on some machines)
+	#bind '"\e[F"':beginning-of-line  # End key (default ?= end-of-line) (Doesn't work)
+	##bind '"\e[3~"':forward-char  # Delete key (default ?= delete-char) (Works)
+	##bind '"\e[2~"':forward-char  # Insert key (default ?= quoted-insert) (Works)
+	##bind '"\e[5~"':forward-char  # PgUp key (default ?= beginning-of-history) (Works)
+	##bind '"\e[6~"':forward-char  # PgDn key (default ?= end-of-history) (Works)
+	##bind '"\e[3;5~"':forward-char  # Ctrl-Delete key (default ?= (blank)) (Works)
+	#bind '"\e[2;5~"':forward-char  # Ctrl-Insert key (default ?= (blank)) (Doesn't work)

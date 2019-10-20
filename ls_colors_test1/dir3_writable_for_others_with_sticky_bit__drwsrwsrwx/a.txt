@@ -1,0 +1,1 @@
+The contents of dir3_writable_for_others_with_sticky_bit__drwsrwsrwx/a.txt

@@ -1,0 +1,41 @@
+# .bashrc
+
+
+if
+	[[ `uname -n` == someExampleMachineName ]]
+then
+	my_bashrc__replacement_home_dir='/net/...../usr2/exampleUserName'
+elif
+		# See the main .bashrc for better comments about this
+		# Here, "uname" doesn't work before we source /etc/profile below
+	[[ `/bin/uname.exe`    == *CYGWIN* ]] ||  # "CYGWIN_NT-5.1"
+	[[ `/bin/uname.exe`    == *MINGW* ]]  # "MINGW32_NT-6.1"  (Windows 7, using an MSYS package from around 2014-06)
+then
+				echo "=== where where:"; where where  # Windows has a command named "where" that works like my alias and the csh where
+				echo "=== where which:"; where which
+				echo "=== which where:"; which where
+				echo "=== which which:"; which which
+	my_bashrc__replacement_home_dir='/h'  # My home dir in Boulder as seen by Cygwin or MSys on Windows in Boulder
+				echo "====== sourcing /etc/profile"
+		source /etc/profile  # Required for Msys/Cygwin. Bash normally does this unless I specify a custom "--init-file" like I did in some Windows shortcuts in the past
+			# ^ the "uname" command doesn't work until this is done
+				echo "=== where where:"; where where  # Windows has a command named "where" that works like my alias and the csh where
+				echo "=== where which:"; where which
+				echo "=== which where:"; which where
+				echo "=== which which:"; which which
+		# Note: example shortcuts I've used on Windows to use mintty and my default settings
+		#	Works (default DOS terminal, no auto sourcing my bash settings):
+		#		\\someNetworkPath\msys\msys.bat
+		#	Works (mintty default config, no auto sourcing my bash settings)
+		#		\\someNetworkPath\msys\msys.bat --mintty
+		#	Works (mintty my config (modded from msys.bat), no auto sourcing my bash settings)
+		#		\\someNetworkPath\msys\bin\mintty.exe --config h:\.minttyrc /bin/bash --login
+		#	Works (mintty my config (modded from msys.bat), auto sources my bash settings)
+		#		\\someNetworkPath\msys\bin\mintty.exe --config h:\.minttyrc /bin/bash --init-file /h/settings/.bashrc__main_for_no_home_dir
+	my_bashrc__replacement_home_dir__hist_location="/c/Temp/.bash_history"
+else
+	#my_bashrc__replacement_home_dir='~psteinbr'
+	my_bashrc__replacement_home_dir='/usr2/psteinbr'
+fi
+
+source $my_bashrc__replacement_home_dir/.bashrc

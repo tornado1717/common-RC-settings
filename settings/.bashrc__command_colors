@@ -1,0 +1,466 @@
+# .bashrc
+
+########################################
+# grep
+##########
+#	Default value in man page:
+#		export GREP_COLORS=         'ms=01;31:mc=01;31:sl=:cx=:fn=35:ln=32:bn=32:se=36'
+#		export GREP_COLORS='mt=01;31:ms=01;31:mc=01;31:sl=:cx=:fn=35:ln=32:bn=32:se=36'
+#	Note about "GREP_COLOR" vs "GREP_COLORS":
+#		"GREP_COLORS" is used for newer versions of grep which I don't have yet (GNU grep 2.5.3).
+#		The newer versions have colors for filenames, linenumbers, ...
+#		Values in GREP_COLORS overrides the single value of GREP_COLOR if both exist
+########################################
+
+#export GREP_COLOR='93'  # Works, default is '1;31'
+#	unset GREP_COLORS  # Works in Cygwin Bash on Blue - if this is left defined, its value will override that of $GREP_COLOR
+#export GREP_COLORS="mt=01;31:fn=:ln=:bn=:se=:ml=:cx=:ne"  # Changes nothing except overrides the match (mt / ms&mc), didn't work in the CSEL (around 2007) but worked on Cygwin (GNU grep 2.5.4)
+
+if [[ ! -n $my_bashrc__running_on_Mac ]]; then
+		defcol='36;43'  # The default color for most of the following (things that I don't know)
+	export GREP_COLORS=""
+	export GREP_COLORS="${GREP_COLORS}s1=${defcol}:"
+	export GREP_COLORS="${GREP_COLORS}mt=01;31:" #01;33  # "matching non-empty text in any matching line (i.e., a selected line when the '-v' command-line option is omitted, or a context line when '-v' is specified). Setting this is equivalent to setting both 'ms=' and 'mc=' at once to the same value"
+		#export GREP_COLORS="${GREP_COLORS}ms=01;31:" #01;33  # TODO: explain, experiment, use this
+		#export GREP_COLORS="${GREP_COLORS}mc=01;31:" #01;33  # TODO: explain, experiment, use this
+	if [ `uname -o` == "Cygwin" ]; then
+		export GREP_COLORS="${GREP_COLORS}fn=1;35:"
+		export GREP_COLORS="${GREP_COLORS}ln=1;32:"
+	else
+		export GREP_COLORS="${GREP_COLORS}fn=35:" #35  # "file names prefixing any content line"
+		export GREP_COLORS="${GREP_COLORS}ln=32:" #32  # "line numbers prefixing any content line"
+	fi
+	export GREP_COLORS="${GREP_COLORS}bn=${defcol}:" #32  # "byte offsets prefixing any content line"
+	if [ `uname -o` == "Cygwin" ]; then
+		export GREP_COLORS="${GREP_COLORS}se=1;36:"
+	else
+		export GREP_COLORS="${GREP_COLORS}se=36:" #36  # "separators that are inserted between selected line fields (':'), between context line fields ('-'), and between groups of adjacent lines when nonzero context is specified ('--')"
+	fi
+	#export GREP_COLORS="${GREP_COLORS}ml=${defcol}:"  # ???
+#	export GREP_COLORS="${GREP_COLORS}cx=90:" #<empty>  # "whole context lines (i.e., non-matching lines when the '-v' command-line option is omitted, or matching lines when '-v' is specified). If however the boolean 'rv' capability and the '-v' command-line option are both specified, it applies to selected non-matching lines instead"
+	#export GREP_COLORS="${GREP_COLORS}ne:" #false  # TODO: explain, experiment, use this
+
+	#export GREP_COLORS="${GREP_COLORS}rv:" #false  # TODO: explain, experiment, use this
+fi
+
+
+########################################
+# ls
+##########
+#	Output default string with "dircolors". Print pretty list with "dircolors --print-database" or "dircolors -p"
+#	The (almost) default command to set up color (given by "dircolors"):
+#		tcsh:  setenv LS_COLORS 'no=00:fi=00:di=01;34:ln=01;36:pi=40;33:so=01;35:do=01;35:bd=40;33;01:cd=40;33;01:or=40;31;01:ex=01;32:*.tar=01;31:*.tgz=01;31:*.arj=01;31:*.taz=01;31:*.lzh=01;31:*.zip=01;31:*.z=01;31:*.Z=01;31:*.gz=01;31:*.bz2=01;31:*.deb=01;31:*.rpm=01;31:*.jar=01;31:*.jpg=01;35:*.jpeg=01;35:*.gif=01;35:*.bmp=01;35:*.pbm=01;35:*.pgm=01;35:*.ppm=01;35:*.tga=01;35:*.xbm=01;35:*.xpm=01;35:*.tif=01;35:*.tiff=01;35:*.png=01;35:*.mpg=01;35:*.mpeg=01;35:*.avi=01;35:*.fli=01;35:*.gl=01;35:*.dl=01;35:*.xcf=01;35:*.xwd=01;35:*.ogg=01;35:*.mp3=01;35:*.wav=01;35:'
+#		bash:  export ...
+#			Could also use program directly (  export LS_COLORS=`dircolors`   or   export LS_COLORS="$(dircolors)"   )
+#	Note:
+#		All stuff set with "setenv" is for tcsh, not bash, and is from my setup at the physics building (Uriel's lab).
+########################################
+
+#color_scheme__ls__dirs="default" #"bright blue", note: "bright blue" is MY default, not the default of whatever system we're on
+color_scheme__ls__dirs="bright yellow"
+#color_scheme__ls__dirs="blue background"
+
+	#if [ `uname -o` == "Cygwin" ]; then
+	#	color_scheme__ls__dirs="blue background"
+	#else
+	#fi
+
+# Possible TODO:
+#	color_scheme__ls__ln="bright"
+#	color_scheme__ls__executables="bright"
+
+
+if [[ -n $my_bashrc__running_on_Mac ]]; then
+	export LSCOLORS=""
+
+	# Define "CLICOLOR" to enable ls colors (same was accomplished by aliasing ls to "ls -G")
+	# From man page (OS X 10.4):
+	#     LSCOLORS        The value of this variable describes what color to use for which attribute when colors are enabled with CLICOLOR.  This string
+	#                     is a concatenation of pairs of the format fb, where f is the foreground color and b is the background color.
+	#
+	#                     The color designators are as follows:
+	#
+	#                           a     black
+	#                           b     red
+	#                           c     green
+	#                           d     brown
+	#                           e     blue
+	#                           f     magenta
+	#                           g     cyan
+	#                           h     light grey
+	#                           A     bold black, usually shows up as dark grey
+	#                           B     bold red
+	#                           C     bold green
+	#                           D     bold brown, usually shows up as yellow
+	#                           E     bold blue
+	#                           F     bold magenta
+	#                           G     bold cyan
+	#                           H     bold light grey; looks like bright white
+	#                           x     default foreground or background
+	#
+	#                     Note that the above are standard ANSI colors.  The actual display may differ depending on the color capabilities of the termi-
+	#                     nal in use.
+	#
+	#                     The order of the attributes are as follows:
+	#
+	#                           1.   directory
+	#                           2.   symbolic link
+	#                           3.   socket
+	#                           4.   pipe
+	#                           5.   executable
+	#                           6.   block special
+	#                           7.   character special
+	#                           8.   executable with setuid bit set
+	#                           9.   executable with setgid bit set
+	#                           10.  directory writable to others, with sticky bit
+	#                           11.  directory writable to others, without sticky bit
+	#
+	#                     The default is "exfxcxdxbxegedabagacad", i.e. blue foreground and default background for regular directories, black foreground
+	#                     and red background for setuid executables, etc.
+
+	#export LSCOLORS="exfxcxdxbxegedabagacad"  # Default vals (psteinbr-mac)
+
+	# Custom - based on Linux default with "gd" = "36;43" as the default "I don't know" color
+	defcol='gd'  # The default color for most of the following (things that I don't know)
+	if [[ $color_scheme__ls__dirs == "bright yellow" ]]; then
+		export LSCOLORS="${LSCOLORS}Dx"  # directory
+	elif [[ $color_scheme__ls__dirs == "blue background" ]]; then
+		export LSCOLORS="${LSCOLORS}xe"  # directory
+	else
+		export LSCOLORS="${LSCOLORS}Ex"  # directory
+	fi
+	export LSCOLORS="${LSCOLORS}gx"  # symbolic link
+	export LSCOLORS="${LSCOLORS}${defcol}"  # socket
+	export LSCOLORS="${LSCOLORS}${defcol}"  # pipe
+	export LSCOLORS="${LSCOLORS}cx"  # executable
+	export LSCOLORS="${LSCOLORS}hf"  # block special (usually found in /dev)
+	export LSCOLORS="${LSCOLORS}hf"  # character special (usually found in /dev)
+	export LSCOLORS="${LSCOLORS}${defcol}"  # executable with setuid bit set
+	export LSCOLORS="${LSCOLORS}${defcol}"  # executable with setgid bit set
+	export LSCOLORS="${LSCOLORS}${defcol}"  # directory writable to others, with sticky bit
+	if [[ $color_scheme__ls__dirs == "bright yellow" ]]; then
+		export LSCOLORS="${LSCOLORS}Db"  # directory writable to others, without sticky bit
+	#elif [[ $color_scheme__ls__dirs == "blue background" ]]; then
+	#	Use the default below
+	else
+		export LSCOLORS="${LSCOLORS}ec"  # directory writable to others, without sticky bit
+	fi
+else
+	export LS_COLORS=""
+	#export LS_COLORS=`dircolors`
+	#export LS_COLORS=`dircolors -b`
+
+		# default vals                 : "no=00:fi=00:di=01;34:ln=01;36:pi=40;33:so=01;35:do=01;35:bd=40;33;01:cd=40;33;01:or=40;31;01:su=37;41:sg=30;43:tw=30;42:ow=34;42:st=37;44:ex=01;32'
+		# default vals (Cygwin on Blue): 'rs=0:di=01;34:ln=01;36:mh=00:pi=40;33:so=01;35:do=01;35:bd=40;33;01:cd=40;33;01:or=40;31;01:mi=00:su=37;41:sg=30;43:ca=30;41:tw=30;42:ow=34;42:st=37;44:ex=01;32:*.tar=01;31:*.tgz=01;31:*.arc=01;31:*.arj=01;31:*.taz=01;31:*.lha=01;31:*.lz4=01;31:*.lzh=01;31:*.lzma=01;31:*.tlz=01;31:*.txz=01;31:*.tzo=01;31:*.t7z=01;31:*.zip=01;31:*.z=01;31:*.Z=01;31:*.dz=01;31:*.gz=01;31:*.lrz=01;31:*.lz=01;31:*.lzo=01;31:*.xz=01;31:*.zst=01;31:*.tzst=01;31:*.bz2=01;31:*.bz=01;31:*.tbz=01;31:*.tbz2=01;31:*.tz=01;31:*.deb=01;31:*.rpm=01;31:*.jar=01;31:*.war=01;31:*.ear=01;31:*.sar=01;31:*.rar=01;31:*.alz=01;31:*.ace=01;31:*.zoo=01;31:*.cpio=01;31:*.7z=01;31:*.rz=01;31:*.cab=01;31:*.jpg=01;35:*.jpeg=01;35:*.mjpg=01;35:*.mjpeg=01;35:*.gif=01;35:*.bmp=01;35:*.pbm=01;35:*.pgm=01;35:*.ppm=01;35:*.tga=01;35:*.xbm=01;35:*.xpm=01;35:*.tif=01;35:*.tiff=01;35:*.png=01;35:*.svg=01;35:*.svgz=01;35:*.mng=01;35:*.pcx=01;35:*.mov=01;35:*.mpg=01;35:*.mpeg=01;35:*.m2v=01;35:*.mkv=01;35:*.webm=01;35:*.ogm=01;35:*.mp4=01;35:*.m4v=01;35:*.mp4v=01;35:*.vob=01;35:*.qt=01;35:*.nuv=01;35:*.wmv=01;35:*.asf=01;35:*.rm=01;35:*.rmvb=01;35:*.flc=01;35:*.avi=01;35:*.fli=01;35:*.flv=01;35:*.gl=01;35:*.dl=01;35:*.xcf=01;35:*.xwd=01;35:*.yuv=01;35:*.cgm=01;35:*.emf=01;35:*.ogv=01;35:*.ogx=01;35:*.aac=00;36:*.au=00;36:*.flac=00;36:*.m4a=00;36:*.mid=00;36:*.midi=00;36:*.mka=00;36:*.mp3=00;36:*.mpc=00;36:*.ogg=00;36:*.ra=00;36:*.wav=00;36:*.oga=00;36:*.opus=00;36:*.spx=00;36:*.xspf=00;36:'
+		# default vals (Ubuntu ?12.??) : 'rs=0:di=01;34:ln=01;36:hl=44;37:pi=40;33:so=01;35:do=01;35:bd=40;33;01:cd=40;33;01:or=40;31;01:su=37;41:sg=30;43:ca=30;41:tw=30;42:ow=34;42:st=37;44:ex=01;32:*.tar=01;31:*.tgz=01;31:*.arj=01;31:*.taz=01;31:*.lzh=01;31:*.lzma=01;31:*.zip=01;31:*.z=01;31:*.Z=01;31:*.dz=01;31:*.gz=01;31:*.bz2=01;31:*.bz=01;31:*.tbz2=01;31:*.tz=01;31:*.deb=01;31:*.rpm=01;31:*.jar=01;31:*.rar=01;31:*.ace=01;31:*.zoo=01;31:*.cpio=01;31:*.7z=01;31:*.rz=01;31:*.jpg=01;35:*.jpeg=01;35:*.gif=01;35:*.bmp=01;35:*.pbm=01;35:*.pgm=01;35:*.ppm=01;35:*.tga=01;35:*.xbm=01;35:*.xpm=01;35:*.tif=01;35:*.tiff=01;35:*.png=01;35:*.svg=01;35:*.svgz=01;35:*.mng=01;35:*.pcx=01;35:*.mov=01;35:*.mpg=01;35:*.mpeg=01;35:*.m2v=01;35:*.mkv=01;35:*.ogm=01;35:*.mp4=01;35:*.m4v=01;35:*.mp4v=01;35:*.vob=01;35:*.qt=01;35:*.nuv=01;35:*.wmv=01;35:*.asf=01;35:*.rm=01;35:*.rmvb=01;35:*.flc=01;35:*.avi=01;35:*.fli=01;35:*.flv=01;35:*.gl=01;35:*.dl=01;35:*.xcf=01;35:*.xwd=01;35:*.yuv=01;35:*.axv=01;35:*.anx=01;35:*.ogv=01;35:*.ogx=01;35:*.aac=00;36:*.au=00;36:*.flac=00;36:*.mid=00;36:*.midi=00;36:*.mka=00;36:*.mp3=00;36:*.mpc=00;36:*.ogg=00;36:*.ra=00;36:*.wav=00;36:*.axa=00;36:*.oga=00;36:*.spx=00;36:*.xspf=00;36:'
+
+	####################
+	# Basic types:
+	####################
+	defcol='36;43'  # The default color for most of the following (things that I don't know)
+
+	if [ `uname -o` == "Cygwin" ]; then
+		export LS_COLORS="${LS_COLORS}rs=0:"  # Reset (I've only seen this on Blue's cygwin so far)
+	fi
+	export LS_COLORS="${LS_COLORS}no=00:"  # Normal?
+	export LS_COLORS="${LS_COLORS}fi=00:"  # Regular File
+
+	# Directory
+	if [[ $color_scheme__ls__dirs == "bright yellow" ]]; then
+		if [[ -n $my_bashrc__bright_color_supported ]]; then
+			export LS_COLORS="${LS_COLORS}di=93:"  # Directory
+		else
+			export LS_COLORS="${LS_COLORS}di=1;33:"  # Directory
+		fi
+	elif [[ $color_scheme__ls__dirs == "blue background" ]]; then
+		export LS_COLORS="${LS_COLORS}di=0;44:"  # Directory
+	else
+		if [[ -n $my_bashrc__bright_color_supported ]]; then
+			export LS_COLORS="${LS_COLORS}di=94:"  # Directory
+		else
+			export LS_COLORS="${LS_COLORS}di=1;34:"  # Directory
+		fi
+	fi
+
+	if [ `uname -o` == "Cygwin" ]; then
+		export LS_COLORS="${LS_COLORS}ln=1;36:"  # symbolic link (If set to 'target' instead of a numerical value, the color is as for the file pointed to.)
+		export LS_COLORS="${LS_COLORS}mh=00:"  # MULTIHARDLINK 00 (regular file with more than one link) (I've only seen this on Blue's cygwin so far)
+	else
+		export LS_COLORS="${LS_COLORS}ln=36:"  # symbolic link (If set to 'target' instead of a numerical value, the color is as for the file pointed to.)
+		if
+			([ `uname -o` != "Msys" ] ||
+				#[ `ls --version` != "*5.97*" ]  # Doesn't work in Msys but probably does in other systems
+				[ ! "`ls --version | grep 5.97`" ]  # Msys requires that commands be surrounded by "", otherwise it tries to execute the output (`ls --version` alone actually does more - it runs "ls" TWICE.  Once to get the version info and then again on all of the output from version info).  It also seems like the bash pattern matching isn't working like it does on other systems, hence the extra "grep"
+			) &&
+			[ ! "`ls --version | grep 8.13`" ] &&  # Every ls version 8.13 I've seen has NOT supported this color option
+			[ ! "`ls --version | grep 8.21`" ]     # Every ls version 8.21 I've seen has NOT supported this color option
+		then
+			export LS_COLORS="${LS_COLORS}hl=${defcol}:"  # HARDLINK 44;37  # regular file with more than one link
+		fi
+	fi
+	export LS_COLORS="${LS_COLORS}pi=$defcol:" #40;33  # FIFO / pipe
+	export LS_COLORS="${LS_COLORS}so=${defcol}:" #01;35  # socket
+	export LS_COLORS="${LS_COLORS}do=${defcol}:" #01;35  # door
+	export LS_COLORS="${LS_COLORS}bd=37;45:" #40;33;01  # block device driver (usually found in /dev)
+	export LS_COLORS="${LS_COLORS}cd=37;45:" #40;33;01  # character device driver (usually found in /dev)
+	if [ `uname -o` == "Cygwin" ]; then
+		export LS_COLORS="${LS_COLORS}or=1;41;36:" #41;1;37 or 40;31;01  # Orphan / symbolic link to non-existant file
+	else
+		export LS_COLORS="${LS_COLORS}or=41;36:" #41;1;37 or 40;31;01  # Orphan / symbolic link to non-existant file
+	fi
+	export LS_COLORS="${LS_COLORS}mi=42;30:" #00  # Missing / "... and the files they point to"
+
+	export LS_COLORS="${LS_COLORS}su=${defcol}:" #37;41  # file that is setuid (u+s)
+	export LS_COLORS="${LS_COLORS}sg=${defcol}:" #30;43  # file that is setgid (g+s)
+	if [ `uname -n` != "thunderstorm" ]; then
+		if
+			#[ `uname -o` == "Cygwin" ] &&
+			([ `uname -o` != "Msys" ] ||
+				[ ! "`ls --version | grep 5.97`" ]  # See other instance of this for a more detailed comment
+			)
+		then
+			export LS_COLORS="${LS_COLORS}ca=${defcol}:" #30;41  # file with capability
+		fi
+
+		if [[ $color_scheme__ls__dirs == "bright yellow" ]]; then
+			if [[ -n $my_bashrc__bright_color_supported ]]; then
+				export LS_COLORS="${LS_COLORS}tw=93;45:" #30;42  # dir that is sticky and other-writable (+t,o+w)
+				export LS_COLORS="${LS_COLORS}ow=93;41:"  # dir that is other-writable (o+w) and not sticky
+			else
+				export LS_COLORS="${LS_COLORS}tw=1;33;45:" #30;42  # dir that is sticky and other-writable (+t,o+w)
+				export LS_COLORS="${LS_COLORS}ow=1;33;41:"  # dir that is other-writable (o+w) and not sticky
+			fi
+		#elif [[ $color_scheme__ls__dirs == "blue background" ]]; then
+		#	Use the default below
+		else
+			export LS_COLORS="${LS_COLORS}tw=34;43:" #30;42  # dir that is sticky and other-writable (+t,o+w)
+			export LS_COLORS="${LS_COLORS}ow=34;42:"  # dir that is other-writable (o+w) and not sticky
+
+			#export LS_COLORS="${LS_COLORS}tw=1;35;44:" #30;42  # dir that is sticky and other-writable (+t,o+w)
+			#export LS_COLORS="${LS_COLORS}ow=1;31;44:"  # dir that is other-writable (o+w) and not sticky
+
+			#if [[ -n $my_bashrc__bright_color_supported ]]; then
+			#	export LS_COLORS="${LS_COLORS}tw=94;45:" #30;42  # dir that is sticky and other-writable (+t,o+w)
+			#	export LS_COLORS="${LS_COLORS}ow=94;41:"  # dir that is other-writable (o+w) and not sticky
+			#else
+			#	export LS_COLORS="${LS_COLORS}tw=1;34;45:" #30;42  # dir that is sticky and other-writable (+t,o+w)
+			#	export LS_COLORS="${LS_COLORS}ow=1;34;41:"  # dir that is other-writable (o+w) and not sticky
+			#fi
+		fi
+
+		export LS_COLORS="${LS_COLORS}st=${defcol}:" #37;44  # dir with the sticky bit set (+t) and not other-writable
+	fi
+
+	if [[ -n $my_bashrc__bright_color_supported ]]; then
+		#export LS_COLORS="${LS_COLORS}ex=92:"  # Executable
+		export LS_COLORS="${LS_COLORS}ex=32:"  # Executable
+	else
+		if [ `uname -o` == "Cygwin" ]; then
+			export LS_COLORS="${LS_COLORS}ex=1;32:"  # Executable
+		else
+			#export LS_COLORS="${LS_COLORS}ex=1;32:"  # Executable
+			export LS_COLORS="${LS_COLORS}ex=32:"  # Executable
+		fi
+	fi
+
+	####################
+	# Executables
+	####################
+	#defcol='01:32'  # The default color for the following
+	#export LS_COLORS="${LS_COLORS}*.cmd=${defcol}:"
+	#export LS_COLORS="${LS_COLORS}*.exe=${defcol}:"
+	#export LS_COLORS="${LS_COLORS}*.com=${defcol}:"
+	#export LS_COLORS="${LS_COLORS}*.btm=${defcol}:"
+	#export LS_COLORS="${LS_COLORS}*.bat=${defcol}:"
+
+	#export LS_COLORS="${LS_COLORS}*.sh=${defcol}:"
+	#export LS_COLORS="${LS_COLORS}*.csh=${defcol}:"
+
+	####################
+	# Text and source files:
+	####################
+	defcol='1'  # The default color for the following
+	export LS_COLORS="${LS_COLORS}*.txt=${defcol}:"
+	export LS_COLORS="${LS_COLORS}*.cpp=${defcol}:"
+	export LS_COLORS="${LS_COLORS}*.h=${defcol}:"
+	export LS_COLORS="${LS_COLORS}*.c=${defcol}:"
+	export LS_COLORS="${LS_COLORS}*.C=${defcol}:"
+	export LS_COLORS="${LS_COLORS}*.H=${defcol}:"
+	export LS_COLORS="${LS_COLORS}*.hpp=${defcol}:"
+	export LS_COLORS="${LS_COLORS}*.java=${defcol}:"
+	export LS_COLORS="${LS_COLORS}*.log=${defcol}:"
+	#export LS_COLORS="${LS_COLORS}*.pl=${defcol}:"  Perl scripts should already be executable
+	export LS_COLORS="${LS_COLORS}*.pm=${defcol}:"
+
+	####################
+	# Archives or compressed files:
+	####################
+	defcol='01;31' #'91' #'01;31'  # The default color for the following
+	export LS_COLORS="${LS_COLORS}*.tar=${defcol}:"
+	export LS_COLORS="${LS_COLORS}*.tgz=${defcol}:"
+	export LS_COLORS="${LS_COLORS}*.arc=${defcol}:"
+	export LS_COLORS="${LS_COLORS}*.arj=${defcol}:"
+	export LS_COLORS="${LS_COLORS}*.taz=${defcol}:"
+	export LS_COLORS="${LS_COLORS}*.lha=${defcol}:"
+	export LS_COLORS="${LS_COLORS}*.lz4=${defcol}:"
+	export LS_COLORS="${LS_COLORS}*.lzh=${defcol}:"
+	export LS_COLORS="${LS_COLORS}*.lzma=${defcol}:"
+	export LS_COLORS="${LS_COLORS}*.tlz=${defcol}:"
+	export LS_COLORS="${LS_COLORS}*.txz=${defcol}:"
+	export LS_COLORS="${LS_COLORS}*.tzo=${defcol}:"
+	export LS_COLORS="${LS_COLORS}*.t7z=${defcol}:"
+	export LS_COLORS="${LS_COLORS}*.zip=${defcol}:"
+	export LS_COLORS="${LS_COLORS}*.z=${defcol}:"
+	export LS_COLORS="${LS_COLORS}*.Z=${defcol}:"
+	export LS_COLORS="${LS_COLORS}*.dz=${defcol}:"
+	export LS_COLORS="${LS_COLORS}*.gz=${defcol}:"
+	export LS_COLORS="${LS_COLORS}*.lrz=${defcol}:"
+	export LS_COLORS="${LS_COLORS}*.lz=${defcol}:"
+	export LS_COLORS="${LS_COLORS}*.lzo=${defcol}:"
+	export LS_COLORS="${LS_COLORS}*.xz=${defcol}:"
+	export LS_COLORS="${LS_COLORS}*.zst=${defcol}:"
+	export LS_COLORS="${LS_COLORS}*.tzst=${defcol}:"
+	export LS_COLORS="${LS_COLORS}*.bz2=${defcol}:"
+	export LS_COLORS="${LS_COLORS}*.bz=${defcol}:"
+	export LS_COLORS="${LS_COLORS}*.tbz=${defcol}:"
+	export LS_COLORS="${LS_COLORS}*.tbz2=${defcol}:"
+	export LS_COLORS="${LS_COLORS}*.tz=${defcol}:"
+	export LS_COLORS="${LS_COLORS}*.deb=${defcol}:"
+	export LS_COLORS="${LS_COLORS}*.rpm=${defcol}:"
+	export LS_COLORS="${LS_COLORS}*.jar=${defcol}:"
+	export LS_COLORS="${LS_COLORS}*.war=${defcol}:"
+	export LS_COLORS="${LS_COLORS}*.ear=${defcol}:"
+	export LS_COLORS="${LS_COLORS}*.sar=${defcol}:"
+	export LS_COLORS="${LS_COLORS}*.rar=${defcol}:"
+	export LS_COLORS="${LS_COLORS}*.alz=${defcol}:"
+	export LS_COLORS="${LS_COLORS}*.ace=${defcol}:"
+	export LS_COLORS="${LS_COLORS}*.zoo=${defcol}:"
+	export LS_COLORS="${LS_COLORS}*.cpio=${defcol}:"
+	export LS_COLORS="${LS_COLORS}*.7z=${defcol}:"
+	export LS_COLORS="${LS_COLORS}*.rz=${defcol}:"
+	export LS_COLORS="${LS_COLORS}*.cab=${defcol}:"
+
+	####################
+	# Media files:
+	####################
+	# Image and video files:
+	defcol='01;35' #'95' #'01;35'  # The default color for the following
+	export LS_COLORS="${LS_COLORS}*.jpg=${defcol}:"
+		export LS_COLORS="${LS_COLORS}*.JPG=${defcol}:"
+	export LS_COLORS="${LS_COLORS}*.jpeg=${defcol}:"
+	export LS_COLORS="${LS_COLORS}*.mjpg=${defcol}:"
+	export LS_COLORS="${LS_COLORS}*.mjpeg=${defcol}:"
+	export LS_COLORS="${LS_COLORS}*.gif=${defcol}:"
+	export LS_COLORS="${LS_COLORS}*.bmp=${defcol}:"
+	export LS_COLORS="${LS_COLORS}*.pbm=${defcol}:"
+	export LS_COLORS="${LS_COLORS}*.pgm=${defcol}:"
+	export LS_COLORS="${LS_COLORS}*.ppm=${defcol}:"
+	export LS_COLORS="${LS_COLORS}*.tga=${defcol}:"
+	export LS_COLORS="${LS_COLORS}*.xbm=${defcol}:"
+	export LS_COLORS="${LS_COLORS}*.xpm=${defcol}:"
+	export LS_COLORS="${LS_COLORS}*.tif=${defcol}:"
+	export LS_COLORS="${LS_COLORS}*.tiff=${defcol}:"
+	export LS_COLORS="${LS_COLORS}*.png=${defcol}:"
+	export LS_COLORS="${LS_COLORS}*.svg=${defcol}:"
+	export LS_COLORS="${LS_COLORS}*.svgz=${defcol}:"
+	export LS_COLORS="${LS_COLORS}*.mng=${defcol}:"
+	export LS_COLORS="${LS_COLORS}*.pcx=${defcol}:"
+	export LS_COLORS="${LS_COLORS}*.mov=${defcol}:"
+	export LS_COLORS="${LS_COLORS}*.mpg=${defcol}:"
+	export LS_COLORS="${LS_COLORS}*.mpeg=${defcol}:"
+	export LS_COLORS="${LS_COLORS}*.m2v=${defcol}:"
+	export LS_COLORS="${LS_COLORS}*.mkv=${defcol}:"
+	export LS_COLORS="${LS_COLORS}*.webm=${defcol}:"
+	export LS_COLORS="${LS_COLORS}*.ogm=${defcol}:"
+	export LS_COLORS="${LS_COLORS}*.mp4=${defcol}:"
+	export LS_COLORS="${LS_COLORS}*.m4v=${defcol}:"
+	export LS_COLORS="${LS_COLORS}*.mp4v=${defcol}:"
+	export LS_COLORS="${LS_COLORS}*.vob=${defcol}:"
+	export LS_COLORS="${LS_COLORS}*.qt=${defcol}:"
+	export LS_COLORS="${LS_COLORS}*.nuv=${defcol}:"
+	export LS_COLORS="${LS_COLORS}*.wmv=${defcol}:"
+	export LS_COLORS="${LS_COLORS}*.asf=${defcol}:"
+	export LS_COLORS="${LS_COLORS}*.rm=${defcol}:"
+	export LS_COLORS="${LS_COLORS}*.rmvb=${defcol}:"
+	export LS_COLORS="${LS_COLORS}*.flc=${defcol}:"
+	export LS_COLORS="${LS_COLORS}*.avi=${defcol}:"
+	export LS_COLORS="${LS_COLORS}*.fli=${defcol}:"
+	export LS_COLORS="${LS_COLORS}*.flv=${defcol}:"
+	export LS_COLORS="${LS_COLORS}*.gl=${defcol}:"
+	export LS_COLORS="${LS_COLORS}*.dl=${defcol}:"
+	export LS_COLORS="${LS_COLORS}*.xcf=${defcol}:"
+	export LS_COLORS="${LS_COLORS}*.xwd=${defcol}:"
+	export LS_COLORS="${LS_COLORS}*.yuv=${defcol}:"
+	export LS_COLORS="${LS_COLORS}*.cgm=${defcol}:"
+	export LS_COLORS="${LS_COLORS}*.emf=${defcol}:"
+	export LS_COLORS="${LS_COLORS}*.ogv=${defcol}:"
+	export LS_COLORS="${LS_COLORS}*.ogx=${defcol}:"
+
+		# http://wiki.xiph.org/index.php/MIME_Types_and_File_Extensions
+	export LS_COLORS="${LS_COLORS}*.axv=${defcol}:"
+	export LS_COLORS="${LS_COLORS}*.anx=${defcol}:"
+
+	# Audio files:
+	#defcol='00;36'  # The default color for the following
+	export LS_COLORS="${LS_COLORS}*.aac=${defcol}:"
+	export LS_COLORS="${LS_COLORS}*.au=${defcol}:"
+	export LS_COLORS="${LS_COLORS}*.flac=${defcol}:"
+	export LS_COLORS="${LS_COLORS}*.m4a=${defcol}:"
+	export LS_COLORS="${LS_COLORS}*.mid=${defcol}:"
+	export LS_COLORS="${LS_COLORS}*.midi=${defcol}:"
+	export LS_COLORS="${LS_COLORS}*.mka=${defcol}:"
+	export LS_COLORS="${LS_COLORS}*.mp3=${defcol}:"
+	export LS_COLORS="${LS_COLORS}*.mpc=${defcol}:"
+	export LS_COLORS="${LS_COLORS}*.ogg=${defcol}:"
+	export LS_COLORS="${LS_COLORS}*.ra=${defcol}:"
+	export LS_COLORS="${LS_COLORS}*.wav=${defcol}:"
+	export LS_COLORS="${LS_COLORS}*.oga=${defcol}:"
+	export LS_COLORS="${LS_COLORS}*.opus=${defcol}:"
+	export LS_COLORS="${LS_COLORS}*.spx=${defcol}:"
+	export LS_COLORS="${LS_COLORS}*.xspf=${defcol}:"
+
+		# http://wiki.xiph.org/index.php/MIME_Types_and_File_Extensions
+	export LS_COLORS="${LS_COLORS}*.axa=${defcol}:"
+fi
+
+
+########################################
+# less / man pages
+########################################
+
+# colored man pages: :)
+export LESS_TERMCAP_mb=$'\E[01;31m'  # Start marker for blinking text
+export LESS_TERMCAP_md=$'\x1B[36m'  # doesn't work: "<><>\x1B01;33m"   works (I guess the escape char needs to be evaluated): $'\E[01;34m'  # Start marker for bold text
+export LESS_TERMCAP_me=$'\E[0m'  # end mode
+#export LESS_TERMCAP_so=$'\E[01;44;33m'  # Start marker for standout-mode (info box)   (includes search results, default is reverse color)
+#export LESS_TERMCAP_se=$'\E[0m'  # end standout-mode
+export LESS_TERMCAP_us=$'\E[01;32m'  # Start marker for underlined text
+export LESS_TERMCAP_ue=$'\E[0m'  # end underline
+
+# syntax highlighting in less:
+export LESSOPEN="| src-hilite-lesspipe.sh %s"
+	#unset LESSOPEN
+export LESS=' -i -R '  # Note on Ubuntu (2013-07-23): Just by having LESS set to something, ALL git outputs (which use less) are piped into a subscreen (take full screen until you hit "q", then all of the output is gone)
+	unset LESS
+
+
+########################################
+# gcc/g++
+########################################
+
+if
+	[ `uname -o` == "Cygwin" ] && (
+		[[ `g++ --version` == *6.4.0* ]] ||
+		[[ `g++ --version` == *7.3.0* ]]
+	)
+then
+		defcol='36;43'  # The default color for most of the following (things that I don't know)
+#	export GCC_COLORS="error=01;31:warning=01;35:note=01;36:caret=01;32:locus=01:quote=01"  # The default according to "CygG++6.4.0 x86_64"'s man page
+	export GCC_COLORS=""
+	export GCC_COLORS="${GCC_COLORS}error=01;31:"  # "SGR substring for error: markers."
+	export GCC_COLORS="${GCC_COLORS}warning=33:"  # "SGR substring for warning: markers."
+	export GCC_COLORS="${GCC_COLORS}note=1;36:"  # "SGR substring for note: markers."
+	export GCC_COLORS="${GCC_COLORS}caret=$defcol:"  # "SGR substring for caret line."
+	export GCC_COLORS="${GCC_COLORS}locus=01;35:"  # "SGR substring for location information, file:line or file:line:column etc."
+	export GCC_COLORS="${GCC_COLORS}quote=01"  # "SGR substring for information printed within quotes."
+fi

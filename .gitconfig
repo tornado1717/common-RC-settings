@@ -1,0 +1,357 @@
+###############################################################################
+# General and Misc Settings
+###############################################################################
+
+[core]
+	#editor = HOME= gvim -y
+#	editor = HOME= C:/cygwin64/home/Paul/Vim_settings/runtime/gvim.exe -y
+	editor = C:/cygwin64/home/Paul/gvim-easy__cygwin-git-wrapper.sh
+
+		# "git config core.filemode false"
+		# "git config --global core.filemode false"
+		# From internet and man pages:
+		#	If false, the executable bit differences between the index and the
+		#	working copy are ignored; useful on broken filesystems like FAT.
+		#	See git-update-index(1). True by default.
+	#filemode = false  # default is "true"
+
+		# "git config --global core.ignorecase false"
+		# From internet and man pages:
+		#	If true, this option enables various workarounds to enable git to work better on filesystems that are not case sensitive, like FAT. For example, if a directory listing finds "makefile" when git expects "Makefile", git will assume it is really the same file, and continue to remember it as "Makefile".
+		#	The default is false, except git-clone(1) or git-init(1) will probe and set core.ignorecase true if appropriate when the repository is created.
+	#ignorecase = true  # default is "false"
+
+	autocrlf = false  # default is "true" on Windows (1.8.1.msysgit.1) and <unset>/false on Linux (1.7.4.1.3.g1adfe - 1.7.4.3 + my mods)
+
+		preloadindex = true  # Perhapse this should only be a per-repo setting?
+		# Also see:
+		#	ignoreStat = true
+		#	index.preload = true  (mentioned in the nabble link below but not in the docs)
+		#	http://stackoverflow.com/questions/18257622/why-is-git-core-preloadindex-default-value-false
+		#		-> http://git.661346.n2.nabble.com/git-status-takes-30-seconds-on-Windows-7-Why-td7580816.html#a7580853
+[core "whitespace"]
+	#blank-at-eol        = true  # "treats trailing whitespaces at the end of the line as an error (enabled by default)."
+	#blank-at-eof        = true  # "treats blank lines added at the end of file as an error (enabled by default)."
+	trailing-space      = true  # "is a short-hand to cover both blank-at-eol and blank-at-eof."
+	space-before-tab    = true  # "treats a space character that appears immediately before a tab character in the initial indent part of the line as an error (enabled by default)."
+	#indent-with-non-tab = false  # "treats a line that is indented with 8 or more space characters as an error (not enabled by default)."
+	#tab-in-indent       = false  # "treats a tab character in the initial indent part of the line as an error (not enabled by default)."
+	#cr-at-eol           = false  # "treats a carriage-return at the end of line as part of the line terminator, i.e. with it, trailing-space does not trigger if the character before such a carriage-return is not a whitespace (not enabled by default)."
+	#tabwidth            = 4  # "tells how many character positions a tab occupies; this is relevant for indent-with-non-tab and when git fixes tab-in-indent errors. The default tab width is 8. Allowed values are 1 to 63."
+
+[user]
+	name = Paul Steinbrecher
+	email = tornado1717@gmail.com
+
+[gc]
+	# This disables git cleanup permanantly unless I manually run it
+	# See "git gc"
+	# Git usage note: This option was initially added by running "git config --global gc.auto 0" from git's man pages, not by manually editing this file (the comments were obviously added by manually editing this though :)
+	auto = 0
+
+
+###############################################################################
+# Colors
+###############################################################################
+
+[color]
+	ui = auto  # default is "???"
+	branch = auto  # default is "false"
+	diff = auto  # default is "false"
+	status = auto  # default is "false"
+	grep = auto  # default is "false"
+	#decorate = auto  # default is "false"
+	#interactive = auto  # default is "false"
+	#pager  # default is "true"
+	#showbranch  # default is "false"
+		# Values can be "auto", "false", and "always"
+
+	#branch.bogusValue3 = someColor  # git 1.7.9: fatal: bad config file line <line> in /home/Paul/.gitconfig
+[color "branch"]
+	current = green reverse  # default is "green"
+	local = green  # default is ""
+	remote = red  # default is "red"
+	#nobranch = red
+	upstream = bold blue
+	#plain = blue white  # default is ""
+
+		# Apparently this is OK in git 1.7.9
+		#	"git config --get           color.branch.bogusvalue1" is fine
+		#	"git config --get-color     color.branch.bogusvalue1" will print an error
+		#	"git config --get-colorbool color.branch.bogusvalue1" will print an error
+	bogusValue1 = someColor
+	bogusValue2 = color.branch.current
+[color "diff"]
+	#plain = blue  # default is "", "plain" is the old name for "context"
+	meta = bold cyan #bold yellow  # default is "bold"
+	frag = bold magenta  # default is "cyan"
+	func = magenta #magenta reverse  # default is ""
+	old                 = bold red  # default is "red"  (according to actual usage, "git config -get..." reports nothing)
+	oldMoved            = 160 #9 #red #red blue  # default is "bold magenta"    For use with --color-moved=zebra
+	oldMovedAlternative = 124 #160 #dim red #dim red blue  # default is "bold blue"
+	new                 = bold green  # default is "green"
+	newMoved            = 40 #10 #green #green blue  # default is "bold cyan"
+	newMovedAlternative = 34 #40 #dim green #dim green blue  # default is "bold yellow"
+	#commit = blue  # default is "yellow", same entry used for commits in "git log"
+		#commit = blue red
+		#commit = 22 28
+		#commit = 231
+		#commit = normal
+		#	See/EX:
+		#		git config --get-colorbool color.diff      # Exits with return code 0 or 1 depending on whether or not the value is set
+		#		git config --get-color     color.diff.new  # Note: this returns the actual color code sequence, not the name -> you can preview the color with something like "git config --get-color color.diff.new; echo ===="
+		#		git config --get           color.diff.new  # Returns the name of the color used
+		#		git config --get           color.diff      # Returns the text setting for color.diff (as defined under '[color] \n diff=...', not '[color "diff"]'
+		#		git config --get-regexp   'color.d'        # Returns the list of all properties that are set and match the grep style regex and their values
+		#		git config                 color.diff auto # UNTESTED!!!  Sets this git config setting in <currentGitRepo>/.git/config
+		#		git config --global        color.diff auto # UNTESTED!!!  Sets this git config setting in ~/.gitconfig
+		#	Available colors as of 2011-03-07 according to the man pages for git-config:
+		#		normal, black, red, green, yellow, blue, magenta, cyan and white
+		#		Attributes: bold, dim, ul (underline), blink and reverse
+		#		Note: directly specifying numbers also has an affect, but I haven't fully explored what each number means yet
+		#	1st color given = foreground, 2nd color = background
+		#	Numerical colors (tested on Ubuntu 9 & 10):
+		#		# n = 0-7  <->  "normal" colors
+		#		#	The terminal color escape code 30+n will be produced (40+n for background) (not quite confirmed by looking at binary values, but the colors look right)
+		#		#	Ex: If n=4, escape sequence = "\x1B[34m"
+		#		# n = 8-15  <->  "high" colors
+		#		#	The terminal color escape code 90+n will be produced (100+n for background) (not quite confirmed by looking at binary values, but the colors look right)
+		#		#	Ex: If n=4, escape sequence = "\x1B[94m"
+		#		# n = 16-231  <->  extended colors
+		#		#	The extended terminal color escape code "\x1B[38;5;nm" will be produced ("\x1B[48;5;nm" for background)
+		#		#	Ex: If n=20, escape sequence = "\x1B[38;5;20m"
+		#		n = 0-255  <->  extended colors
+		#			The extended terminal color escape code "\x1B[38;5;nm" will be produced ("\x1B[48;5;nm" for background)
+		#			Ex: If n=20, escape sequence = "\x1B[38;5;20m"
+		#			Color mapping:
+		#			n = 0-7:  regular colors  ( (red==on) + 2*(green==enabled) + 4*(blue==enabled) )
+		#			n = 8-15:  high colors  ( (red==on) + 2*(green==enabled) + 4*(blue==enabled) )
+		#			n = 16-231:  RGB colors
+		#				R, G, and B each range between 0 & 5
+		#				color code = 16 + B + 6*G + 6*6*R
+		#			n = 232-255:  Grayscale
+		#				R = G = B = gray and range between 0 & 23
+		#				color code = 16 + 216 + gray
+	#whitespace = blue white  # default is "normal red"
+[color "status"]
+	added = yellow  # default is "green"
+	changed = green  # default is "red"
+	untracked = cyan  # default is "red"
+	#unmerged = blue white  # default is "red"  (this option is undocumented right now)
+	#header = blue white  # default is ???
+	#updated = blue white  # "added" and "updated" seem to be the same thing - git only uses the value of 1 of them and it seems kind of random as to which one.  default is ???
+	#branch = blue white  # default is ???
+	#nobranch = blue white  # default is ???
+[color "grep"]
+	#context = bold  # default is "",  used when -A, -B, or -C is used
+	filename = magenta  # default is ""
+	#function = yellow  # default is "",   used when -p is used
+	linenumber = green  # default is "",   used when -n is used
+	#match = bold red  # default is "red bold"
+	#selected = red  # default is "",   non-matching text in the matched line
+	#separator = cyan bold  # default is "cyan"
+[color "decorate"]
+	branch = green  # default is "green bold"
+	remoteBranch = red  # default is "red bold"
+	tag = bold yellow  # default is "yellow bold"
+	#stash  # default is ???
+	#HEAD = bold  # default is "cyan bold"
+[color "interactive"]
+	prompt = black white  # default is "blue bold"
+	#header = blue white  # default is "bold"
+	help = cyan  # default is "red bold"
+	error = bold red  # default is "cyan"
+
+
+###############################################################################
+# Aliases
+###############################################################################
+
+[alias]
+	########################################
+	# log
+	########################################
+	renames = log --summary --stat         --oneline          -C -M --find-copies-harder  # Show a list of file adds, deletes, and renames
+		# "--find-copies-harder" increases CPU time, but shows more file copies as copies instead of adds (See "-C")
+	llg = log --abbrev-commit --abbrev=0 --decorate  # my "prefered" log
+	lfg = log --pretty=fuller            --decorate
+
+	llg-stat  = log --abbrev-commit --abbrev=0 --decorate   --name-status -C -M
+	llg-diff  = log --abbrev-commit --abbrev=0 --decorate   --patch-with-stat
+	llg-wdiff = log --abbrev-commit --abbrev=0 --decorate   --patch-with-stat \
+		-w --color-words="[0-9]*\\\\.[0-9]+[a-zA-Z]*|[A-Za-z0-9_]+|[^[:space:]]|[:space:]+|//|/\\\\*|\\\\*/|->|==|>=|<=|!=|\\\\|\\\\||&&|\\\\+=|-=|\\\\*=|/=|\\\\|=|&=|\\\\.\\\\.\\\\.|::"
+		# ^Keep this regex in sync with the one "wdiff" and friends use
+	llg-cdiff = log --abbrev-commit --abbrev=0 --decorate   --patch-with-stat -C -M \
+		-w --color-words="[^[:space:]]"
+	llg-cwdiff = log --abbrev-commit --abbrev=0 --decorate   --patch-with-stat -C -M \
+		--word-diff=plain --word-diff-regex=.
+	llg-full  = log --abbrev-commit --abbrev=0 --decorate   --summary      -C -M --follow --find-copies-harder
+
+
+	####################
+	# log: graph
+	####################
+			# "--oneline" = "--abbrev-commit --pretty=oneline"
+		#graph = log --graph --boundary --decorate  --format='The author of %h was %an, %ar%nThe title was >>%s<<%n'
+		#graph = log --graph --boundary --decorate  --format='%C(remote)%h%Creset %gd %s'
+		#graph = log --graph --boundary --decorate  --format='%Cred%h%Creset %gd %s'
+		#graph = log --graph --boundary --decorate  --oneline --abbrev=0
+		#	The "--abbrev=0" overrides the default # of digits to display in the commit. 0 = as few as possible (not consistent for all commits within a repo)
+		#	"--abbrev" (no params) should use the default short # of digits, but neither "--abbrev" nor "--abbrev=<n>" seems to work without "--abbrev-commit" as well
+		#		In theory, if "--abbrev" is used
+
+	graph            = log --graph --boundary --oneline --decorate            # Show a nice condensed graph of a git history
+	#graph            = log --graph --boundary --oneline --decorate  --follow  # Show a nice condensed graph of a git history
+
+		# Note: multiple commits can be specified and if they are, they will both be shown in the same graph even if this results in multiple heads
+		#	Ex: git graph 48e8642 3c5efbd
+		#	The "--all" option can be used to specify all referenced commits (more specifically all commits in refs/*)
+		#	Also see "--branches[=<pattern>]", "--tags[=<pattern>]", "--remotes[=<pattern>]", "--glob=<glob-pattern>"
+	graph-all        = log --graph --boundary --oneline --decorate                                       --all  # Show a nice condensed graph of a git history for all branches and tags, not just the current one
+	graph-all-labels = log --graph --boundary --oneline --decorate  --abbrev=0 --simplify-by-decoration  --all  # Show a nice condensed graph of a git history for all branches and tags, not just the current one
+	graph-stat       = log --graph --boundary --oneline --decorate  --name-status  -C -M                        # Show a nice condensed graph of a git history with a summary of all renames, deletes, and adds.  "--diff-filter=[CRM ADT] can also be used with this
+	graph-renames    = log --graph --boundary --oneline --decorate  --summary      -C -M                        # Show a nice condensed graph of a git history with a summary of all renames, deletes, and adds
+	graph-full       = log --graph --boundary --oneline --decorate  --summary      -C -M --follow --find-copies-harder  # Show a nice condensed graph of a git history with a summary of all renames, deletes, and adds. Follow file renames. Only works when individual files are specified
+#	graph-time       = log --graph --boundary --pretty='%ai   %ci   %C(yellow)%h%C(reset) %C(yellow)%d%C(reset) %s'  # The "%d" is like --decorate
+	graph-time       = log --graph --boundary --pretty='%ai   %ci   %C(auto)%h%C(reset) %C(auto)%d%C(reset) %s'  # The "%d" is like --decorate
+		# ^ Need git 1.8.3 or 1.8.4 for the "%C(auto)" to work
+		#	^ See: http://stackoverflow.com/questions/5889878/color-in-git-log
+	graph-compare    = log --graph --boundary --oneline --decorate  --left-right                                # Show a nice condensed graph of a difference in git histories (Note: 2 commits need to be specified and "..." needs to be used instead of "..". Ex: git_graph_compare 234534...436564)
+		# Note: for graph compare, this is usually called with 2 commits separated by a triple dot (...), not a double dot (..) like you use for diffs
+		#	Ex:
+		#		git graph-compare 1234234...6797899
+		#	<commit1>...<commit2> returns all commits that are reachable by only 1 of the specified commits
+		#	You can also say <commit1> ^<commit2> for all commits rechable by <commit1>, but not <commit2>
+		#	To see all branches that aren't merged into the current HEAD, try "git branch --no-merged"
+		#	To see all branches that aren't merged into a specified branch, try "git branch --no-merged <branchOrCommit>" or "git branch -a --no-merged"
+		#		Also see "--merged"
+
+	grdate = log --graph --boundary --full-history --all --color --decorate --date=relative --pretty=tformat:'%Cgreen%h %Creset(%Cred%an%Cgreen|%Cblue%ad%Creset) %Creset%s %Cgreen%d'
+
+	########################################
+	# diff & show
+	########################################
+		# The following are equivalent (not yet sure how this helps though) (from git tutorial):
+		#	git diff <commit1>...<commit2>
+		#	git diff $(git merge-base <commit1> <commit2>) <commit2>
+		# The following are equivalent commit IDs (from git tutorial):
+		#	Ex 1:
+		#		master
+		#		heads/master
+		#		refs/heads/master
+		#	Ex 2:
+		#		origin/master
+		#		remotes/origin/master
+		#		refs/remotes/origin/master
+	diff-stat     = diff --name-status  # Show a "git status" for all diffs between 2 commits
+			# See: "--diff-filter=M" and "--summary --diff-filter=ADCRT"
+		# Same as diff-stat, but for "git show" and includes more info from the git comment
+		show-stat = show --name-status --decorate
+
+		# Show each change on a per word basis instead of a per line basis
+		# See:
+		#	--word-diff-regex=..., --word-diff=color, --color-words=...
+		#	Ex: git diff --color-words="[A-Za-z0-9_]+|[^A-Za-z0-9_[:space:]]|//"
+		#		Default is equivalent to "\S+"
+		#		Default with the -w optopn is equivalent to ???
+		#		Recommended addition is "|[^[:space:]]" where "[:space:]" is the POSIX equivalent to "\s" (and "[^\S]") in Perl which is "[ \t\r\n\v\f]" in ASCII (See wikipedia's regex page)
+		#	Note: "[A-Za-z0-9_]" is equivalent to \w and [^\W] in Perl
+		#	'\' gets evaluated 2 times, once by .gitconfig interpreter, once by ???.  To get an escaped char in like '*', you need "\\\\*".  If this were specified directly on command line instead, only "\*" would have been needed
+	dwdiff  = diff -C -M --color-words  # Use default --color-words
+	dwwdiff = diff -C -M --color-words -w
+		# Breakdown of the regex being used:
+		#		[0-9]*\\\\.[0-9]+[a-zA-Z]*   = number with decimal point (nums without decimal points are already included with the word regex)  =  0 or more digits, then '.', then 1 or more digits followed by any number qualifiers (a C/C++ number could be ".5f").   This will not work for nums with >=1 digit, then '.', then nothing (ex: "1.")  I don't like writing nums that way anyway except for notes files where I don't care about this
+		#		[A-Za-z0-9_]+   = a word (1 or more normal word chars in a row)
+		#	#	[^A-Za-z0-9_[:space:]]   = a single non-word char that still needs to be diffed like punctuation.  This includes all non-whitespace not already covered by the word regex.  This could also be replaced by a list of all non-whitespace chars, but that would get really big.
+		#		[^[:space:]]   = a single non-word char that still needs to be diffed and isn't included in other word regexes like punctuation.  Recommended by the documentation.
+		#	#	[\\\\n\\\\r]   = any newline char - this was an effort to make comments at the start of lines stop appearing at the end of the previous line in the diff output
+		#		[:space:]+   = a group of whitespace
+		#			Somehow this causes "::" to be part of the diff between the strings "main::data_files" and "main::adbShellCommandsToRun"
+		#			TODO:
+		#				Investigate why wdiff only shows "::p" & "::ap" as the diffed words between "StackTrace::printStackTrace_long" & "StackTrace::aprintStackTrace_long"
+		#				I also noticed that right now, wdiff only shows "narf" & "narf_array" as the diffed words between "testModuleAPI::snarf("${filename" and "testModuleAPI::snarf_array("${filename"
+		#		C/C++ specific words made out of punctuations:
+		#			//   = a "//" comment in C/C++
+		#			/\\\\*   = a "/*" comment in C/C++
+		#			\\\\*/   = a "*/" comment in C/C++
+		#			...
+		#			-> == >= <= != || && += -= *= /* |= &= ... ::
+		#	Note: "-w" is also being used because some whitespace only changes are still causing lines to be printed otherwise.  Not sure why yet.
+	wdiff = diff -w --color-words="[0-9]*\\\\.[0-9]+[a-zA-Z]*|[A-Za-z0-9_]+|[^[:space:]]|[:space:]+|//|/\\\\*|\\\\*/|->|==|>=|<=|!=|\\\\|\\\\||&&|\\\\+=|-=|\\\\*=|/=|\\\\|=|&=|\\\\.\\\\.\\\\.|::"
+		# Same as wdiff, but for "git show" and includes more info from the git comment
+		wshow = show -w --color-words="[0-9]*\\\\.[0-9]+[a-zA-Z]*|[A-Za-z0-9_]+|[^[:space:]]|[:space:]+|//|/\\\\*|\\\\*/|->|==|>=|<=|!=|\\\\|\\\\||&&|\\\\+=|-=|\\\\*=|/=|\\\\|=|&=|\\\\.\\\\.\\\\.|::" --decorate
+				# Note: git aliases can have '-' in their names but not '_'
+			wshow-1 = show -C -M -w                           --color-words="[0-9]*\\\\.[0-9]+[a-zA-Z]*|[A-Za-z0-9_]+|[^[:space:]]|[:space:]+|//|/\\\\*|\\\\*/|->|==|>=|<=|!=|\\\\|\\\\||&&|\\\\+=|-=|\\\\*=|/=|\\\\|=|&=|\\\\.\\\\.\\\\.|::"
+			wshow-2 = show -C -M -w --word-diff=color     --word-diff-regex="[0-9]*\\\\.[0-9]+[a-zA-Z]*|[A-Za-z0-9_]+|[^[:space:]]|[:space:]+|//|/\\\\*|\\\\*/|->|==|>=|<=|!=|\\\\|\\\\||&&|\\\\+=|-=|\\\\*=|/=|\\\\|=|&=|\\\\.\\\\.\\\\.|::"
+			wshow-3 = show -C -M -w --word-diff=plain     --word-diff-regex="[0-9]*\\\\.[0-9]+[a-zA-Z]*|[A-Za-z0-9_]+|[^[:space:]]|[:space:]+|//|/\\\\*|\\\\*/|->|==|>=|<=|!=|\\\\|\\\\||&&|\\\\+=|-=|\\\\*=|/=|\\\\|=|&=|\\\\.\\\\.\\\\.|::"
+			wshow-4 = show -C -M -w --word-diff=porcelain --word-diff-regex="[0-9]*\\\\.[0-9]+[a-zA-Z]*|[A-Za-z0-9_]+|[^[:space:]]|[:space:]+|//|/\\\\*|\\\\*/|->|==|>=|<=|!=|\\\\|\\\\||&&|\\\\+=|-=|\\\\*=|/=|\\\\|=|&=|\\\\.\\\\.\\\\.|::"
+	cdiff = diff -C -M -w --color-words="[^[:space:]]"
+		# Same as cdiff, but for "git show" and includes more info from the git comment
+		cshow = show -C -M -w --color-words="[^[:space:]]" --decorate
+
+	cwdiff = diff -C -M --word-diff=plain --word-diff-regex=.
+		# Same as cwdiff, but for "git show" and includes more info from the git comment
+		cwshow = show -C -M --word-diff=plain --word-diff-regex=. --decorate
+
+	shw = show -C -M --decorate
+	show-fstat = show --name-status --decorate --pretty=fuller
+
+	########################################
+	# status
+	########################################
+		# TODO: get status-ignored to show ignored directories as well
+		#	Right now, if there's an ignored directory, "git status-ignored" will still decend into that dir and look for and list files ignored by other exclude patterns like *.swp
+		#		Check out the --directory option - didn't seem to work, but it's a start
+	status-ignored = ls-files --others --exclude-standard --ignored  # List all files that aren't indexed and are excluded by .gitignore
+	status-untracked = ls-files --others --exclude-standard  # List all untracked files that wouldn't be excluded by .gitignore.  This lists files in subdirs recursively instead of just listing the subdir as a whole but only if a specific dir other than "." is provided as a cmd line option (is this command just flakey?)
+
+
+###############################################################################
+# Non-Aliases diff and log Settings
+###############################################################################
+
+# Doesn't seem to work
+#[diff "cpp"]
+	# Custom diff params for "cpp" files
+	# The regex assigned to wordregex is used to replace the default regex used by --color-words and --word-diff unless another is directly specified
+#	wordregex=[^[:space:]]  # Not really what I want, but helps me test git attribs
+	#wordregex="[A-Za-z0-9_]+|[^A-Za-z0-9_[:space:]]"
+
+# See git .gitattributes: filters, smudge, and clean for enforceing proper newlines in things like future GLES conformance merges
+
+# See: core.autocrlf
+#	true = convert to CRLF (on Windows) during checkout and back to LF during commits
+#	input = checkout as is, convert to LF lineends during commits
+#	false = no newline conversions
+
+
+[diff]
+	#	"1" = "true" = detect file renames
+	#	"copy" = "copies" = detect file renames and copies
+	renames = copies
+
+	#	"The number of files to consider when performing the copy/rename detection; equivalent to the git diff option -l."
+	#	I don't know what the default value for this is
+	#	I think setting this to "0" will probably remove the limit completely
+	renameLimit = 10000
+
+	#	"GNU diff's --suppress-blank-empty option makes it so that diff does not
+	#	add a space or tab before each empty output line of context.  With this
+	#	option, empty context lines are empty also in "git diff" output.
+	#	Before (and without the option), they'd have a single trailing space."
+	#
+	#	Default = false
+#	suppress-blank-empty=true  # Commented out for now due to a bug in git (1.7.4.1 + my unrelated changes)
+
+	colorMoved = zebra  # Can also be directly specified on command line with "--color-moved=zebra"
+
+# See: merge.renameLimit
+#	The number of files to consider when performing rename detection during a merge; if not specified, defaults to the value of diff.renameLimit
+# See: merge.tool
+#	Custom merge tool to use (like "opendiff") instead of git's built in merge
+
+#log.abbrev-commit=yes  # Assume that "--abbrev-commit" is always specified for "git log" and "git show" (only show shortened commit/object IDs)
+[log]
+	#	Note: This will only take effect with a newer version of git (I think 1.7.5 or 1.7.6)
+	abbrev-commit=yes
+	date=iso  # 'Default format for human-readable dates. (Compare the --date option.) Defaults to "default", which means to write dates like Sat May 8 19:35:34 2010 -0500.'

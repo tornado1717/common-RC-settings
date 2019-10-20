@@ -1,0 +1,524 @@
+# .bashrc
+
+alias echo="echo -e"
+
+alias grep="grep --color=auto"
+alias egrep="egrep --color=auto"
+alias fgrep="fgrep --color=auto"
+	tmp__grep_excludes="--exclude='*~'"
+	if [[ ! -n $my_bashrc__running_on_Mac ]]; then
+		# Mac currently doesn't support "--exclude-dir"
+		tmp__grep_excludes="${tmp__grep_excludes} --exclude-dir='.git'"
+	fi
+	# Excluding some image formats I've seen that are sometimes detected as text formats even though they're binary
+	tmp__grep_excludes="${tmp__grep_excludes} --exclude='*.tga'"
+	# I haven't seen any failures caused by the following file types yet, but this still seems like a good optimization
+	tmp__grep_excludes="${tmp__grep_excludes} --exclude='*.dll' --exclude='*.so' --exclude='*.so.*' --exclude='*.exe' --exclude='*.bin' --exclude='*.gz' --exclude='*.tar.Z' --exclude='*.jar'"
+	# I haven't seen any failures caused by the following file types yet, but this still seems like a good optimization + I'm leery
+	tmp__grep_excludes="${tmp__grep_excludes} --exclude='*.tar'"
+alias gr="grep -rIn ${tmp__grep_excludes}"
+alias egr="egrep -rIn ${tmp__grep_excludes}"
+alias fgr="fgrep -rIn ${tmp__grep_excludes}"
+# Also see $GREP_COLOR (in .bashrc__command_colors), $GREP_COLORS, $GREP_OPTIONS
+#GREP_OPTIONS='--color=auto --exclude-dir=".git" --exclude="*~"'
+
+alias find_ll=my_find_ll
+my_find_ll() {
+	find "$@" -printf '%y %03m --- %9s --- %TY-%Tm-%Td %TT %TZ --- %p (-> %l)\n'
+}
+alias find_ll_cmpIndivFiles=my_find_ll_cmpIndivFiles
+my_find_ll_cmpIndivFiles() {
+	find "$@" -printf '%f %y --- %s --- %TY-%Tm-%Td %TT %TZ --- %h (-> %l)\n' #| sort
+}
+
+	# Note: Alias are used within subsequent aliases -> because "ls" is aliased to use the color flags, so are "ll" and "la" which both contain "ls" within their alias definitions
+if [[ -n $my_bashrc__running_on_Mac ]]; then
+	alias ls='ls -G'  # "-G" enables colors and is like "--color=tty" in Linux
+		# "-O" causes flags to be shown (Mac only thing I think, see "chflags")
+		# "-e" causes the file's ACL to be shown if it exists (MUST be used with "-l" to work)
+		# "-@" causes the file's extended attribute keys to be shown if they exist (MUST be used with "-l" to work, see "xattr")
+		# "-T" uses the long time format
+	alias ll='ls -AlOe@T'
+else
+	alias ls='ls --color=auto'
+		#alias ls='ls --color=auto -F'  # The "-F" / "--classify" appends an indicator (one of */=>@|) to the file names to indicate their type (an alternative to colors but can be used together)
+	#alias ll='ls -Al'
+	#alias ll='ls -Al --full-time'  # "--full-time" is the same as "--time-style=full-iso" as well as '--time-style=+"%Y-%m-%d %T.%N %z"' (which is the same format as the "date" command)
+	#alias ll='ls -Al --time-style=long-iso'
+		# See the "$LC_ALL" environmental var
+	alias ll='ls -Al --time-style=+"%Y-%m-%d %T %z"'
+fi
+alias la='ls -A'
+
+alias cp='cp -pi'  # Preserve permissions, TODO: find out how to preserve soft links as well
+alias scp='scp -p'  # Preserve permissions, TODO: find out how to preserve soft links as well
+alias mv='mv -i'
+alias rm='rm -i'
+
+alias date_fileFriendly='/bin/date +"%Y-%m-%d--%H-%M-%S"'  # Show the date in a modified, file friendly ISO-8601 standard (YYYY-MM-DD--HH-mm-ss).  Timezone info is not included.
+alias date_fileFriendly_short='/bin/date +"%Y%m%d-%H%M"'  # Show the date in a modified, file friendly ISO-8601 standard (YYYYMMDD-HHmm).  Timezone info is not included.
+if [[ ! -n $my_bashrc__running_on_Mac ]]; then
+	alias date_msec='/bin/date +"%Y-%m-%d %T.%3N %z"'  # Show the date in ISO-8601 standard with milliseconds ("2013-07-02 18:23:38.123 -0600" instead of "Tue Jul  2 18:19:30 MDT 2013")
+	alias date_nsec='/bin/date +"%Y-%m-%d %T.%N %z"'  # Show the date in ISO-8601 standard with nanoseconds ("2013-07-02 18:23:38.123456789 -0600" instead of "Tue Jul  2 18:19:30 MDT 2013")
+fi
+alias date='date +"%Y-%m-%d %T %z"'  # Show the date in ISO-8601 standard ("2013-07-02 18:23:38 -0600" instead of "Tue Jul  2 18:19:30 MDT 2013")
+
+#alias pd="pushd"
+#	Example usage:
+#		pd .
+#	Can test with:
+#		TODO
+#alias pd="pushd | perl -e 'foreach (<STDIN>) { s/ /\n/g; print; }'"  # Doesn't work, see below
+my_pushd() {
+	#echo $1 - $2 - $@
+
+	#	Doesn't work due to a bash bug
+	#		"In bash we cannot directly execute pushd command in the pipe as bash contain the bug -- the last stage of the pipe does not belongs to the current environment as in ksh."
+	#		The current dir stack WILL be printed, but pushd WON'T modify it or switch to the specified dir
+	#	See: http://www.softpanorama.org/Scripting/Shellorama/pushd_and_popd.shtml
+	#pushd $1 | perl -e 'foreach (<STDIN>) {s/ /\n/g; print;}';
+
+	# Actually execute the pushd and ignore all of its output (the output is printed by my_pwd() below)
+	#	# Apparently "> /dev/null" also causes pushd to print stuff but otherwise be ineffective
+	pushd $1 > /dev/null;
+	#	builtin pushd $1 > /dev/null;  # Fails in the same way
+
+	my_pwd
+}
+alias pd=my_pushd
+#alias pop="popd"
+my_popd() {
+	# Actually execute the popd - don't suppress its output or process it (see pushd notes above)
+	popd > /dev/null;
+
+	my_pwd
+}
+alias pop=my_popd
+my_pwd() {
+	# "dirs" prints what pushd would have printed, but without modifying anything
+	#	# Putting this before the pushd is a cheap trick to eliminate the "duplicate" line
+	#echo a b c\\ d e | perl -e 'foreach (<STDIN>) {s/([^\\]) /$1\n/g; print;}';
+#	dirs              | perl -e 'foreach (<STDIN>) {s/([^\\]) /$1\n/g; print;}';
+	dirs              | perl -e 'foreach (<STDIN>) {s/ ([~\/])/\n$1/g; print;}';
+}
+alias ppwd=my_pwd
+
+
+if [[ -n $my_bashrc__running_on_Mac ]]; then
+	alias du='du -k -d 1'
+	alias df='df -k'  # "-m" prints in units of MB, "-k" prints in units of KB (1024 byte),  Overrides value of "$BLOCKSIZE"
+else
+	# Notes:
+	#	"-B n" displays size in units of n bytes
+	#	"-B" is the same as "--block-size="
+	#alias du='du --max-depth=1 -B 1'    # units of 1    byte
+	#alias du='du --max-depth=1 -B kB'   # units of 1000 bytes, displays the "kB" ("-B kB"  same as "-BkB" , 'k' same as 'K')
+	#alias du='du --max-depth=1 -B 1kB'  # units of 1000 bytes                    ("-B 1kB" same as "-B1kB", 'k' same as 'K')
+	#alias du='du --max-depth=1 -B2kB'   # units of 2000 bytes                    ("-B 2kB" same as "-B2kB", 'k' same as 'K')
+	alias du='du --max-depth=1 -Bk'     # units of 1024 bytes, displays the "K"  ("-B k"   same as "-Bk"  , 'k' same as 'K')
+	#alias du='du --max-depth=1 -B1k'    # units of 1024 bytes                    ("-B 1k"  same as "-B1k" , 'k' same as 'K')
+	#alias du='du --max-depth=1 -B2k'    # units of 2048 bytes                    ("-B 2k"  same as "-B2k" , 'k' same as 'K')
+	alias df='df -Bk'  # same size params as "du",  overrides value of "$BLOCKSIZE"
+fi
+
+	##### A quick bash test to see if commands are available ("ls" in this example)
+	#if [[ -z `which ls` ]]; then
+	#	echo "ls isn't installed"
+	#else
+	#	echo "ls is installed, YAY!"
+	#fi
+	##### End of the test
+if [[ -z  `which traceroute 2>/dev/null` ]]; then
+	# On some systems, traceroute isn't installed, hopefully tracepath is
+	alias traceroute='echo "\e[31;1mTrying tracepath instead...\e[0m"; tracepath'
+fi
+
+alias mkdir='mkdir -p'  # Allow multiple subdirectories / parent dirs to be made. IE: "mkdir a/b" is OK whereas before you'd have to type "mkdir a; mkdir a/b"
+#alias rmdir='rmdir -p'  # Allow multiple subdirectories / parent dirs to be removed. IE: "rmdir a/b" is OK whereas before you'd have to type "rmdir a/b; rmdir a"
+#alias rmAllEmptyDirs='rmdir -p */*/*/*/*/*/*/*/*/*; rmdir -p */*/*/*/*/*/*/*/*; rmdir -p */*/*/*/*/*/*/*; rmdir -p */*/*/*/*/*/*; rmdir -p */*/*/*/*/*; rmdir -p */*/*/*/*; rmdir -p */*/*/*; rmdir -p */*/*; rmdir -p */*; rmdir -p *'  # Remove all empty dirs from the current directory (works up to 10 levels deep, very verbose)
+
+if [[ ! -n $my_bashrc__running_on_Mac ]]; then
+	alias cal='cal -3'  # show 3 months by default
+fi
+
+if [[ ! -n $my_bashrc__running_on_Mac ]]; then
+	alias top='top -d 1'  # update system info once every second (default is once every 3 seconds)
+		# Note: I don't know how to sort top's entries with command line options yet, but you can sort by mem usage my hitting "M" while top is running
+	alias ps='ps --forest'
+fi
+alias ps_start='jobs; ps -O ppid,pgid,lstart'
+	# Note:
+	#	-O stime       adds the process' start time to the output  (format is different between Linux & Mac)
+	#	-O start  also adds the process' start time to the output  (format is different between Linux & Mac)
+	#	-O lstart also adds the process' start time to the output but shows the complete timestamp (Ex: "Sat Jul 27 15:30:13 2013")
+
+
+if [[ ! -n $my_bashrc__running_on_Mac ]]; then
+# TODO: Replace this (^) check with a file check or parse "where"'s output to see if gvim exists
+	if
+		[[ `uname`    == *CYGWIN* ]]  # "CYGWIN_NT-5.1"
+	then
+		alias gvim='HOME= gvim -y'
+			# ^ "HOME= " temporarily sets the shell's environmental var $HOME to "" so that ~/.vimrc (a Cygwin softlink) isn't used by gvim.exe (a non-Cygwin-terminal app) thus avoiding errors about a corrupt file starting with "!<symlink>"
+			# "gvim" seems to correspond with my Bash alias which sets "gvim" to "gvim -y"
+			# See .bashrc__command_aliases : "gvim -y" for more description
+	else
+		alias gvim='gvim -y'
+	fi
+fi
+
+
+#alias git_renames='git log --summary --stat --abbrev-commit --pretty=oneline -M --find-copies-harder'  # Shows the list of file adds, deletes, and renames
+#alias git_graph='git log --graph --pretty=oneline --abbrev-commit'  # Show a nice condensed graph of a git history
+	# See: "--diff-filter=M" and "--summary --diff-filter=ADCRT"
+	# See: .gitconfig for more comments and all git aliases
+alias git_squareGraph='/cygdrive/c/Users/Paul/Downloads/Programming/git-scripts/git-forest'
+
+
+# sort of like "where" in tcsh, but not as good yet
+#	Not all paths are listed by either which or whereis, so this still makes an incomplete list, possibly with duplicates
+#	It also doesn't list functions yet either and doesn't fully support aliases (extra undesired matches sometimes returned)
+function where () {
+	echo "=== which:"
+	which -a "$@"
+	if [[ -n $my_bashrc__running_on_Cygwin ]]; then
+		# Windows also has a where.exe
+		echo "=== where.exe:"
+		where.exe "$@"
+	else
+		echo "=== whereis:"
+		if [[ -n $my_bashrc__running_on_Mac ]]; then
+			whereis "$@"
+		else
+			whereis -b "$@"
+		fi
+	fi
+	echo "=== alias:"
+	alias | grep "$@"
+}
+
+
+if [[ -n $my_bashrc__bright_color_supported ]]; then
+	alias marker="echo '\033[94;103m####\033[92;101m####\033[91;102m####\033[93;104m####\033[0m'"
+else
+	# Similar or same as above, but without the higher colors (90-97,100-107) due to terminal compatibility issues
+	alias marker="echo '\033[1;34;43m####\033[1;32;41m####\033[1;31;42m####\033[1;33;44m####\033[0m'"
+fi
+
+#alias checkusb="mount |grep 'usb'"
+#alias umountusb="umount /media/usbdisk"
+#alias mountusb="mount /media/usbdisk"  # Mounting should be automatic and this shouldn't need to be run.
+
+#	Example usage:
+#		nicePath $PATH
+#		niceID `id`
+#	Can test code with something like the following:
+#		perl -e 'foreach (@ARGV) { s/:/\n/g; print; } print("\n");' a:bb:c
+#			same as:
+#			nicePath a:bb:c
+#	TODO:
+#		make niceID more readable:
+#			stop removing spaces between uid, gid, group
+#			stop showing 1st group on 1st line grouped with "groups="
+#			split group numbers and names into 2 columns
+#			sort groups by number or name
+alias nicePath="perl -e 'foreach (@ARGV) { s/:/\n/g; print; } print(\"\n\");'"
+alias niceID="perl -e 'foreach (@ARGV) { s/,/\n/g; print; } print(\"\n\");'"
+
+
+
+	# There is no bash equivalent for alias parameters
+	# In tcsh, I could use:
+	#	alias echo3 "echo \!@.edu"
+	#	The "\!" is actually a history replacement
+
+	# In bash, these both work, I don't know what the difference between "$*" and "$@" is yet though
+#function echo3 () { echo "$@@.edu"; }
+#function echo3 () { echo "$*@.edu"; }
+
+# print 20 lines from a file centered around a certain line number
+	# $(( $@ - 4 )) is math in bash, if $@ is not a number, only the 4 will be returned
+	# "$1" is the 1st argument only, "$2" is the 2nd argument only, ...
+	# Bash can currently only do only int math, but lookup "bc" for floating point
+#function line () { cat $2 | head -n $(( $1 - 10 )) | tail -n 20; }
+
+#function line () { if [[ $1 -lt 10 ]]; then cat $2 | head -n $(( $1 - 10 )) | tail -n 20; else echo "wer"; fi; };
+	# Same as above line, but multi-line:
+#function line () {
+#	if [[ $1 -gt 10 ]]; then
+#		cat $2 | head -n $(( $1 - 10 )) | tail -n 20
+#	else
+#		echo "wer"
+#	fi
+#}
+
+# Works perfectly
+##function line () { cat $2 | head -n $(( $1 + 10 )) | tail -n 20; }
+
+# Print a specified line from a file and its surroundings.
+# The specified line is highlighted
+#	Ex usage: line 34 file.txt
+function line () {
+	#file_length=`wc -l $2`
+	# TODO:
+	#	fix line offset / line duplicate errors that happen when I print a line that's too close to or past the end of the file.
+	#	allow for multiple file input
+	#	-replace "echo" with something that doesn't add extra newlines
+	#		"echo -n" does it
+
+	local line_color="\033[32;1m"
+	local reset_color="\033[0m"
+	local line_context_size=10
+
+	if [[ $1 -eq 1 ]]; then  # $1 == 1
+		echo -n "$line_color"
+		cat $2 | head -n 1
+		echo -n "$reset_color"
+		cat $2 | head -n $(( $line_context_size + 1 )) | tail -n $line_context_size
+	else
+		#cat $2 | head -n $(( $1 - 1 )) | tail -n $(( $line_context_size * 2))
+		cat $2 | head -n $(( $1 - 1 )) | tail -n $(( $line_context_size ))
+		echo -n "$line_color"
+		cat $2 | head -n $1 | tail -n 1
+		echo -n "$reset_color"
+		cat $2 | head -n $(( $1 + $line_context_size )) | tail -n $line_context_size
+	fi
+}
+
+
+####################
+# More neat things from "what's in your bashrc"
+#	See:
+#		http://stackoverflow.com/questions/3746/whats-in-your-bashrc
+####################
+
+#alias cd..="cd .."  # corrects the typo "cd.."
+#alias ..="cd .."
+#alias ...="cd ../.."
+#alias ....="cd ../../.."
+
+
+####################
+# Replacement for "dos2unix"
+####################
+
+#function mac2unix() {
+#	cat $1 | tr '\r' '\n'
+#}
+
+#function mac2unix() {
+#	cat $1 | tr '\n' '\r'
+#}
+
+# Works fairly well, but has issues if multiple files are specified (Ex: *.patch).  Was also replaced by the "dos2unix" from macports via "sudo port install dos2unix"
+#function dos2unix() {
+#	#cat $1 | tr -d '\r'
+#
+#	#cat $1 | tr -d '\r' > $1.very_unique_suffix_dsaeq34rew
+#	#mv -f $1.very_unique_suffix_dsaeq34rew $1
+#
+#	#echo "<<< $1 >>>"
+#	for fileName in $1; do
+#		#echo $fileName
+#
+#		cat $fileName | tr -d '\r' > $fileName.very_unique_suffix_dsaeq34rew
+#		mv -f $fileName.very_unique_suffix_dsaeq34rew $fileName
+#	done
+#}
+
+# TODO:
+#	# Works fairly well, but has issues if multiple files are specified (Ex: *.patch).  Should be replaced by the "unix2dos" from macports, but that installer can't find it right now
+function unix2dos() {
+	#echo "<<< $1 >>>"
+	for fileName in $1; do
+		#echo $fileName
+
+		cat $fileName | tr -d '\r' > $fileName.very_unique_suffix_dsaeq34rew
+		mv -f $fileName.very_unique_suffix_dsaeq34rew $fileName
+	done
+}
+
+
+####################
+# run "find" but filter out directories that aren't the deepest subdir or file
+# Commands used for testing:
+#	# Create a test dir structure
+#	for d1 in tmp/{,d,d2}; do for d2 in $d1/{,d,d2}; do for d3 in $d2/{dEmpty,dEmpty2}; do mkdir $d3; done; for f1 in $d2/{a,b,c}; do for f2 in ${f1}{,2}; do touch $f2; done; done; done; done
+#		->
+#		#for d1 in tmp/{,d,d2}; do
+#		#	for d2 in $d1/{,d,d2}; do
+#		#		for d3 in $d2/{dEmpty,dEmpty2}; do
+#		#			mkdir $d3
+#		#		done
+#		#		for f1 in $d2/{a,b,c}; do
+#		#			for f2 in ${f1}{,2}; do
+#		#				touch $f2
+#		#			done
+#		#		done
+#		#	done
+#		#done
+#
+#	for d1 in tmp/{d,"d 2",d-3,d.4,d_5}; do mkdir "$d1"; touch "$d1/f"; done
+#		->
+#		#for d1 in tmp/{d,"d 2",d-3,d.4,d_5}; do
+#		#	mkdir "$d1"
+#		#	touch "$d1/f"
+#		#done
+#
+#	# Source this file and run findDeepest on our test dir
+#	source .bashrc__command_aliases; findDeepest tmp*
+####################
+
+alias findDeepest=my_findDeepest
+
+my_findDeepest() {
+	#echo "<<< $1 >>>"
+	#echo "<<< $@ >>>"
+	find "$@" | perl -e '
+		@allLines = <STDIN>;
+		chomp(@allLines);
+		#@allLines = sort @allLines;
+		@allLines = sort {customAlphabetOrder($a) cmp customAlphabetOrder($b)} @allLines;  # Sort ASCII-betically excapt pretend that "/" is the 1st char in that alphabet
+			#foreach $line (@allLines) {
+			#	print sprintf("  > %-30s (%-30s)\n", $line, customAlphabetOrder($line));
+			#}
+
+		# Munge the string so that the "cmp" operator can pretend that "/" comes at the start of the alphabet
+		# This is needed to handle cases like this:
+		#	d/f
+		#	d.1/f
+		# Without this we will get the following output from this func:
+		#	d     <- should not be listed but was because ASCII-betically, "." comes between <empty> and "/" so the code below does not notice
+		#	d.1/f
+		#	d/f
+		sub customAlphabetOrder {
+			my ($string) = @_;
+				#my $origString = $string;
+			#$string =~ tr!\\x00-\\/!/\\x00-\\xFF!;
+			#$string =~ tr!/\x00-\.!\x00-\xFF!;  # Seems to work for sorting
+			$string =~ tr!/\ -\.!\ -\/!;  # Works for sorting
+				# ^ breakdown:
+				#	tr!
+				#		/\ -\.    <- The ordered list of chars to search for. This is short hand notation for the list "/", " ", ...all-chars-between-ASCIIbetically..., "."   ("." is the character directly before "/" in ANSCII-betical order)
+				#	!
+				#		\ -\/     <- The ordered list of chars to use as replacements. This is short hand notation for the list " ", ...all-chars-between-ASCIIbetically..., "/"
+				#	!;
+				# See: http://www.perlmonks.org/?node_id=897216
+				#print("  \"$origString\" -> \"$string\"\n");
+			return $string;
+		}
+
+		#$debugMax = 100;
+		#for ($i=0; $i<scalar(@allLines); $i++) {
+		#	print(">$allLines[$i]<\n");
+		#	for ($j=$i+1; $j<scalar(@allLines); $j++) {
+		#		print("    >$allLines[$j]<\n");
+		#		$debugMax--; if ($debugMax <= 0) {exit(0);}
+		#		if ($allLines[$j] =~ /^$allLines[$i]/) {
+		#			print("Del\n");
+		#			splice(@allLines, $i, 1);
+		#			$i--;
+		#			last;
+		#		}
+		#	}
+		#}
+
+		for ($i = 0; $i < scalar(@allLines)-1; $i++) {
+			# Assuming that the output from find is already sorted (dirs are listed before their subdirs and sub files), we can use this instead of a loop as an optimization
+			#print(">$allLines[$i]< >$allLines[$i+1]<\n");
+			my $nextLine = $allLines[$i+1];
+			$nextLine =~ s/(\/)[^\/]*$/$1/;
+			if ($nextLine =~ /^\Q$allLines[$i]\E/) {
+				#print("Del\n");
+				splice(@allLines, $i, 1);
+				$i--;
+			}
+		}
+
+		foreach $line (@allLines) {
+			print "$line\n";
+		}
+	'
+}
+
+
+####################
+# "grep" for non-ASCII characters
+# More notes about this in my notes.txt - search for
+#	Main example commands from my notes.txt:
+#		gr "[^ -~	]" ../notes.txt    (has a literal tab char in it)
+#		gr -P "[^\x20-\x7F\t\r\n]" ../notes.txt
+#		perl -ne 'print "$. $_" if m/[\x80-\xFF]/' notes.txt
+####################
+
+if [[ -n $my_bashrc__running_on_Cygwin ]]; then
+	alias gr_nonASCI=my_gr_nonASCI
+
+	my_gr_nonASCI() {
+		perl -e '
+			$resetCol = "\x1B[0m";
+			%grepColors = (
+				mt => "\x1B[31m",
+				mtEscaped => "\x1B[34m", #"$resetCol\x1B[31;47m",
+				fn => "\x1B[35m",
+				ln => "\x1B[32m",
+				se => "\x1B[36m",
+			);
+
+			if (defined($ENV{GREP_COLORS})) {
+				foreach $colName (keys(%grepColors)) {
+					if (
+						($ENV{GREP_COLORS} =~ /$colName=([^:]*)$/) or
+						($ENV{GREP_COLORS} =~ /$colName=([^:]*):/)
+					) {
+						$grepColors{$colName} = "\x1B[" . $1 . "m";
+					}
+				}
+			}
+
+			foreach $fileName (@ARGV) {  # Assumes every argument is always a file name
+				#print("'$fileName'\n");
+
+				if (not open(inFile, "<", $fileName)) {
+					print("Error opening '$fileName'\n");
+				} else {
+					my @fileLines = <inFile>;
+					close(inFile);
+
+					$lineNum = 0;
+					foreach $line (@fileLines) {
+						$lineNum++;
+						#print("line = '$line'\n");
+
+						$firstMatchOnLine = 1;
+						while ($line =~ s/^([\x20-\x7F\t\r\n]*)([^\x20-\x7F\t\r\n]+)//) {
+							if ($firstMatchOnLine) {
+								if (@ARGV > 1) {
+									print("$grepColors{fn}$fileName$grepColors{se}:");
+								}
+								print("$grepColors{ln}$lineNum$grepColors{se}:$resetCol");
+							}
+							$firstMatchOnLine = 0;
+
+			#				print("$1$grepColors{mt}$2$resetCol");
+							$nonMatchText = $1;
+							$matchedText = $2;
+							$matchedText_convertedToEscapedChars = "(";
+							$tmp = $matchedText;
+							while ($tmp =~ s/^(.)//) {
+								$matchedText_convertedToEscapedChars .= sprintf("<%X>", ord($1));
+							}
+							$matchedText_convertedToEscapedChars .= ")";
+							print("$nonMatchText$grepColors{mt}$matchedText$grepColors{mtEscaped}$matchedText_convertedToEscapedChars$resetCol");
+						}
+						if (not $firstMatchOnLine) {
+							#print the rest of the line
+							$line =~ s/[\r\n]*$//;
+							print("$line\n");
+						}
+					}
+				}
+			}
+		' "$@"
+	}
+fi
